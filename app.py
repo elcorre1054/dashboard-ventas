@@ -36,8 +36,26 @@ st.markdown("""
 # Cargar los datos (Asegúrate de que tu archivo se llame Ventas.xlsx o usa la versión CSV)
 @st.cache_data
 def load_data():
-    # Intenta leer el archivo Excel; si tienes el CSV, puedes cambiarlo aquí
-    df = pd.read_excel("Ventas.xlsx")
+    # Intenta leer el archivo Excel o CSV automáticamente según lo que tengas subido
+    import os
+    if os.path.exists("Ventas.xlsx"):
+        df = pd.read_excel("Ventas.xlsx")
+    elif os.path.exists("ventas.xlsx"):
+        df = pd.read_excel("ventas.xlsx")
+    elif os.path.exists("Ventas.xlsx - VENTAS.csv"):
+        df = pd.read_csv("Ventas.xlsx - VENTAS.csv")
+    else:
+        # Busca cualquier archivo CSV o Excel en la carpeta
+        import glob
+        archivos_excel = glob.glob("*.xlsx")
+        archivos_csv = glob.glob("*.csv")
+        if archivos_excel:
+            df = pd.read_excel(archivos_excel[0])
+        elif archivos_csv:
+            df = pd.read_csv(archivos_csv[0])
+        else:
+            raise FileNotFoundError("No se encontró ningún archivo de datos en el repositorio.")
+
     df['Fecha'] = pd.to_datetime(df['Fecha'])
     df['AÑO'] = df['Fecha'].dt.year
     df['MES'] = df['Fecha'].dt.strftime('%Y-%m')
